@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ip-tool-daemonset
+  labels:
+    app: ip-tool
+spec:
+  selector:
+    matchLabels:
+      app: ip-tool
+  template:
+    metadata:
+      labels:
+        app: ip-tool
+    spec:
+      containers:
+      - name: ip-tool-container
+        image: europe-central2-docker.pkg.dev/active-cirrus-456610-u2/registry/ip-tool:v1.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            python ./ip_tool.py 2>/dev/null
+            sleep infinity
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
